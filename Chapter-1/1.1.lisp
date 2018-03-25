@@ -7,3 +7,10 @@
     (if (member (first (last name)) *suffix*)
         (last-name (butlast name))
         (first (last name))))
+
+
+(defun test ()
+    (mapcar #'(lambda (name) (print (last-name name)))
+            '((Rex Morgan MD) (Morton Downey Jr.))))
+
+(test)
