@@ -1,11 +1,10 @@
 (defun count-anywhere (target exp)
-    (cond ((null exp) 0)
-          ((atom (first exp))
-           (+ (if (eq target (first exp)) 1 0) (count-anywhere target (rest exp))))
-          (t
-           (+ (count-anywhere target (first exp)) (count-anywhere target (rest exp))))))
+    (cond ((eq target exp) 1)
+          ((atom exp) 0)
+          (t (+ (count-anywhere target (first exp)) 
+                (count-anywhere target (rest exp))))))
 
 (defun test ()
-    (print (count-anywhere  'a '(a (nil b) c))))
+    (print (count-anywhere  'a '(a (nil a a b) c))))
 
 (test)
