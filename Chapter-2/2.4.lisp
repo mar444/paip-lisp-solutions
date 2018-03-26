@@ -1,8 +1,11 @@
 (load "auxfns.lisp")
 
-(defun new-cross-product (x y)
-    (mappend #'(lambda (y-item)
-        (mappend #'(lambda (x-item)
-                   (list (list x-item y-item))) x)) y))
+(defun new-cross-product (fn xlist ylist)
+    (mappend #'(lambda (yitem)
+        (mapcar #'(lambda (xitem)
+                   (funcall fn xitem yitem)) xlist)) ylist))
 
-(print (new-cross-product '(1 2 3) '(4 5 6)))
+(defun new-combine-all (xlist ylist)
+    (new-cross-product #'append xlist ylist))
+
+(print (new-combine-all '((1 2) (2 3)) '((4 5) (5 6))))
