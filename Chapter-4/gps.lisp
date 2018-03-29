@@ -1,12 +1,14 @@
+(load "auxfns.lisp")
+
 (defstruct op "Operation"
     (action nil) (preconds nil) (add-list nil) (del-list nil))
 
 
-; (defun GPS (start-state goals ops)
-;   (let ((after-state-list (mappend #'(lambda (state) (apply-op state ops)) '(start-state))))
-;     (if (equal-sets after-state-list '(start-state))
-;         (some #'(lambda (state) (every #'(lambda (goal) (member goal state)) goals)) after-state-list)
-;         (some #'(lambda (state) (GPS state goals ops)) after-state-list))))
+(defun GPS (start-state goals ops)
+  (let ((after-state-list (mappend #'(lambda (state) (apply-op state ops)) '(start-state))))
+    (if (equal-sets after-state-list '(start-state))
+        (some #'(lambda (state) (every #'(lambda (goal) (member goal state)) goals)) after-state-list)
+        (some #'(lambda (state) (GPS state goals ops)) after-state-list))))
 
 (defun apply-op (state ops)
   (cond ((null ops) (list state))
@@ -18,5 +20,8 @@
                  (apply-op state (rest ops)))))
         (t (apply-op state (rest ops)))))
 
-(print (apply-op '(a b) (list (make-op :preconds '(a) :add-list '(c) :del-list '(a)))))
+(print (apply-op '(a b) (list (make-op :preconds '(b) :add-list '(c) :del-list '(b)))))
+
+
+; (print (GPS '(a) '(c) (list (make-op :preconds '(b) :add-list '(c) :del-list '(b)))))
     
