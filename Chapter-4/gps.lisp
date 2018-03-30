@@ -5,23 +5,24 @@
 
 (defvar *visited* nil)
 
-(defun GPS (start-state goals ops)    
-  (cond ((achieve-all start-state goals)
+(defun GPS (start-state goals ops)   
+  (cond ((visited-p start-state) nil)
+        ((achieve-all start-state goals)
          start-state)
-        ((member start-state *visited*) nil)
         (t (progn (setf *visited* (union *visited* (list start-state)))
-                 (let ((next-state-list (apply-op start-state ops)))
-                   (print next-state-list)
-                   (if (null next-state-list) nil
-                       (or (some #'(lambda (state) (achieve-all state goals)) next-state-list)
-                           (some #'(lambda (state) (GPS state goals ops)) next-state-list))))))))
+                  (let ((next-state-list (apply-op start-state ops)))
+                    (if (null next-state-list) nil
+                        (some #'(lambda (state) (GPS state goals ops)) next-state-list)))))))
 
+(defun visited-p (state)
+  (some #'(lambda (visited-state) (equal-sets visited-state state)) *visited*))
 
 (defun achieve-all (state goals)
   (every #'(lambda (goal) (member goal state)) goals))
 
 (defun equal-sets (x y)
-  (every #'(lambda (item) (member item y)) x))
+  (and (every #'(lambda (item) (member item y)) x)
+       (every #'(lambda (item) (member item x)) y)))
 
 ;; return a list of state that results from applying operation on the given state
 (defun apply-op (state ops)
@@ -31,12 +32,8 @@
          
          (let* ((op (first ops))
                 (next-state (union (op-add-list op) (set-difference state (op-del-list op)))))
-           (if (not (member next-state *visited*))
-               (progn (setf *visited* (union *visited* (list next-state)))
-                      ; (print next-state)
-                      (append (list next-state)
-                              (apply-op state (rest ops))))
-               (apply-op state (rest ops)))))
+           (append (list next-state)
+                   (apply-op state (rest ops)))))
         
         (t (apply-op state (rest ops)))))
 
@@ -65,16 +62,9 @@
 
 (defvar *ops* *school-ops*)
 
-(print (GPS '(a b f) '(d e) 
-            (list (make-op :action 't1
-                           :preconds '(a)
-                           :add-list '(d))
-                  (make-op :action 't2
-                           :preconds '(b)
-                           :add-list '(f))
-                  (make-op :action 't3
-                           :preconds '(f)
-                           :add-list '(e)))))
 
-; (print (GPS '(SON-AT-HOME CAR-NEEDS-BATTERY HAVE-money have-phone-book) '(son-at-school) *ops*))
+(print (GPS '(SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) '(SON-AT-SCHOOL) *ops*))
 
+(print (GPS '(SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY) '(SON-AT-SCHOOL) *ops*))
+
+(print (GPS '(SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY HAVE-PHONE-BOOK) '(SON-AT-SCHOOL HAVE-MONEY) *ops*))
