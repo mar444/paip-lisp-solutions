@@ -4,7 +4,11 @@
 
 (defvar *visited* nil)
 
+
 (defun GPS (start-state-actions goals ops)
+  (GPS-helper `(,start-state-actions) goals ops))
+
+(defun GPS-helper (start-state-actions goals ops)
   (let ((start-state (first start-state-actions))
         (start-actions (second start-state-actions)))
     (cond ((visited-p start-state) nil)
@@ -12,7 +16,7 @@
         (t (progn (setf *visited* (union *visited* (list start-state)))
                   (let ((next-state-list (apply-op start-state start-actions ops)))
                     (if (null next-state-list) nil
-                        (some #'(lambda (state) (GPS state goals ops)) next-state-list))))))))   
+                        (some #'(lambda (state) (GPS-helper state goals ops)) next-state-list))))))))   
   
 
 (defun visited-p (state)
