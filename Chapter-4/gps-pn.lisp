@@ -8,28 +8,29 @@
 
 (defun GPS (*state* goals *ops*)
   "General Problem Solver: achieve all goals using *ops*."
-  (if (every #'achieve goals) 'solved))
+  (if (achieve-all goals) 'solved))
 
 (defun achieve (goal)
   "A goal is achieved if it already holds,
   or if there is an appropriate op for it that is applicable."
   (or (member goal *state*)
-      (some #'apply-op 
-            (new-find-all goal *ops* :test #'appropriate-p))))
+      (some #'new-apply-op 
+            (new-find-all goal *ops* :test #'new-appropriate-p))))
 
 (defun new-find-all (item sequence &key (test #'eql))
   (remove-if-not #'(lambda (x) (apply test (list item x))) sequence))
 
-(defun appropriate-p (goal op)
-  "An op is appropriate to a goal if it is in its add list."
+(defun new-appropriate-p (goal op)
   (member goal (op-add-list op)))
 
-(defun apply-op (op)
-  "Print a message and update *state* if op is applicable."
-  (when (every #'achieve (op-preconds op))
-    (print (list 'executing (op-action op)))
-    (setf *state* (set-difference *state* (op-del-list op)))
-    (setf *state* (union *state* (op-add-list op)))
-    t))
+(defun new-apply-op (op)
+  (if (achieve-all (op-preconds op))
+      (progn 
+        (print (list 'executing (op-action op)))
+        (setf *state* (set-difference (union *state* (op-add-list op)) (op-del-list op))))
+      nil))
+
+(defun achieve-all (goals)
+  (every #'achieve goals))
 
 (run-tests #'GPS *ops*)
