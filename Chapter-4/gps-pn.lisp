@@ -33,4 +33,4 @@
 (defun achieve-all (goals)
   (every #'achieve goals))
 
-(run-tests #'GPS *ops*)
+(run-school-tests #'GPS *ops*)

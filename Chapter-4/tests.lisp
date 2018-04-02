@@ -1,4 +1,4 @@
-(defun run-tests (gps *ops*)
+(defun run-school-tests (gps *ops*)
     ;; 4.4 TEST CASES
 
     ;; SOLVED 
@@ -30,3 +30,21 @@
 
     ;; NIL
     (print (GPS '(SON-AT-HOME CAR-NEEDS-BATTERY HAVE-MONEY) '(SON-AT-SCHOOL) *ops*)))
+
+
+(defun run-blocks-tests (gps *ops*)
+    (print 
+      (GPS '((a on table) (b on table) (space on a) (space on b) (space on table))
+         '((a on b) (b on table)) *ops*))
+    
+    (print 
+      (GPS '((a on b) (b on table) (space on a) (space on table))
+         '((b on a)) *ops*))
+    
+    (print
+      (GPS '((a on b) (b on c) (c on table) (space on a) (space on table))
+         '((b on a) (c on b)) *ops*))
+    
+    (print
+      (GPS '((c on a) (a on table) (b on table) (space on c) (space on b) (space on table))
+         '((b on c) (a on b)) *ops*)))
