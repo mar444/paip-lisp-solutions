@@ -27,4 +27,8 @@
 
 
 (debug :gps)
+(dbg :gps "~a" 2)
+
+(dbg-indent :gps 0 "~a" 2)
+(dbg-indent :gps 2 "~a" 2)
 (dbg-indent :gps 4 "~a" 2)
