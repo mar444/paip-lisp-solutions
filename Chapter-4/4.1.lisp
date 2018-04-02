@@ -14,7 +14,17 @@
 (defun dbg (id format-string &rest args)
   "Print debugging info if (DEBUG ID) has been specified."
   (when (member id *dbg-ids*)
-    (apply #'format *debug-io* (concatenate 'string "~%" format-string) args)))
+    (apply #'format *debug-io* (concatenate 'string "~&" format-string) args)))
+
+
+;;; ==============================
+
+(defun dbg-indent (id indent format-string &rest args)
+  "Print indented debugging info if (DEBUG ID) has been specified."
+  (when (member id *dbg-ids*)
+    (format *debug-io* "~&~V@T~?" (* 2 indent) format-string args)))
+
+
 
 (debug :gps)
-(dbg :gps "~a" 2)
+(dbg-indent :gps 4 "~a" 2)
