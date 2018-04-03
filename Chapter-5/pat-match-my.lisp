@@ -1,46 +1,63 @@
+; (load "auxfns.lisp")
+(load "tests.lisp")
+
+(defconstant fail nil)
+(defconstant no-bindings '((t . t)))
+
+
 (defun variable-p (x)
   (and (symbolp x) (equal (char (symbol-name x) 0) #\?)))
 
-(defun pat-match (pattern input)
-  (cond ((and (null pattern) (null input)) '(nil))
-        ((or (null pattern) (null input)) nil)
-        (t (let ((current-pattern (first pattern))
-                 (current-input (first input))
-                 (result (pat-match (rest pattern) (rest input))))
-             (cond ((not result) nil)
-                   ((variable-p current-pattern)
-                    (let ((var (list (cons current-pattern current-input)))
-                          (binding (get-binding current-pattern result)))
-                        (cond ((null (first result)) var)
-                              ((null binding) (append var result))
-                              ((equal (get-value binding) current-input) result)
-                              (t nil))))
-                   ((and (atom current-pattern) (atom current-input) (eql current-pattern current-input))
-                    (if (null (first result))
-                        '(matched)
-                        result))
-                   (t f))))))
+(defun segment-p (x)
+  (and (consp x)
+       (starts-with x '?*)))
+
+(defun pat-match (pattern input &optional (bindings no-bindings))
+  (cond ((eq bindings fail) fail)
+        ((variable-p pattern)
+         (match-variable pattern input bindings))
+        ((and (atom pattern) (atom input) (eql pattern input)) bindings)
+        ((and (consp pattern) (consp input))
+         (pat-match (rest pattern) (rest input)
+                    (pat-match (first pattern) (first input) bindings)))
+        (t fail)))
+
+
+(defun match-variable (var input bindings)
+  (let ((binding (get-binding var bindings)))
+    (cond ((not binding) (extend-bindings var input bindings))
+          ((equal (binding-val binding) input) bindings)
+          (t fail))))
+
+
+(defun match-segment (pattern input result &optional (start 0))
+  (let* ((var (second (first pattern)))
+         (target (first (rest pattern)))
+         (pos (find target input :start start :test #'equal)))
+    (if (null pos)
+        nil
+        (let ((result-2 (pat-match (rest pattern) (subseq input pos))))
+          (if (null result-2)
+              (match-segment pattern input result (+ pos 1))
+              (append (list (cons var (subseq input 0 pos))) result-2))))))
 
 
 (defun get-binding (var bindings)
   (assoc var bindings))
 
-
-(defun get-value (binding)
+(defun binding-val (binding)
   (cdr binding))
 
-;; match with ?x
-(print (pat-match '(I need f ?X ?Y) '(I need f t f)))
-(print (pat-match '(I need f ?X ?X) '(I need f t f)))
-(print (pat-match '(I need f ?X ?X) '(I need f t t)))
-
-;; match without ?x
-(print (pat-match '(I need f) '(I need f)))
-(print (pat-match '(I need v f) '(I need v f)))
-
-;; non match
-(print (pat-match '(I need f) '(I need f t)))
+(defun extend-bindings (var val bindings)
+  (cons (cons var val) 
+        (if (eq bindings no-bindings)
+            nil
+            bindings)))
 
 
-(print (sublis (pat-match '(I need f ?X ?Y) '(I need f t f))
-        '(what would it mean to you if you got a ?X ?Y)))
+; (print (pat-match '((?* ?P) need (?* ?X)) '(I really need A F)))
+
+; (print (pat-match '((?* ?P) need (?* ?X)) '(I really need A F)))
+
+(run-tests #'pat-match)
+
