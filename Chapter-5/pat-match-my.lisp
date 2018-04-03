@@ -9,18 +9,30 @@
                  (result (pat-match (rest pattern) (rest input))))
              (cond ((not result) nil)
                    ((variable-p current-pattern)
-                    (let ((var (list (cons current-pattern current-input))))
-                      (if (null (first result))
-                          var
-                          (append var result))))
+                    (let ((var (list (cons current-pattern current-input)))
+                          (binding (get-binding current-pattern result)))
+                        (cond ((null (first result)) var)
+                              ((null binding) (append var result))
+                              ((equal (get-value binding) current-input) result)
+                              (t nil))))
                    ((and (atom current-pattern) (atom current-input) (eql current-pattern current-input))
                     (if (null (first result))
                         '(matched)
                         result))
                    (t f))))))
 
+
+(defun get-binding (var bindings)
+  (assoc var bindings))
+
+
+(defun get-value (binding)
+  (cdr binding))
+
 ;; match with ?x
 (print (pat-match '(I need f ?X ?Y) '(I need f t f)))
+(print (pat-match '(I need f ?X ?X) '(I need f t f)))
+(print (pat-match '(I need f ?X ?X) '(I need f t t)))
 
 ;; match without ?x
 (print (pat-match '(I need f) '(I need f)))
