@@ -17,5 +17,7 @@
 
 
 (print (pat-match '(I need f ?X) '(I need f t)))
+
+(print (pat-match '(I need f) '(I need f t)))
                  
                  
