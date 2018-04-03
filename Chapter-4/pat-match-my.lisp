@@ -9,7 +9,7 @@
                  (result (pat-match (rest pattern) (rest input))))
              (cond ((not result) nil)
                    ((variable-p current-pattern)
-                    (let ((var (list (list 'variable current-pattern current-input))))
+                    (let ((var (list (cons current-pattern current-input))))
                       (if (null (first result))
                           var
                           (append var result))))
@@ -20,7 +20,7 @@
                    (t f))))))
 
 ;; match with ?x
-(print (pat-match '(I need f ?X ?X) '(I need f t f)))
+(print (pat-match '(I need f ?X ?Y) '(I need f t f)))
 
 ;; match without ?x
 (print (pat-match '(I need f) '(I need f)))
@@ -29,3 +29,6 @@
 ;; non match
 (print (pat-match '(I need f) '(I need f t)))
 
+
+(print (sublis (pat-match '(I need f ?X ?Y) '(I need f t f))
+        '(what would it mean to you if you got a ?X ?Y)))
