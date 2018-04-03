@@ -1,23 +1,31 @@
 (defun variable-p (x)
-    (and (symbolp x) (equal (char (symbol-name x) 0) #\?)))
+  (and (symbolp x) (equal (char (symbol-name x) 0) #\?)))
 
 (defun pat-match (pattern input)
-  (cond ((and (null pattern) (null input)) '(()))
+  (cond ((and (null pattern) (null input)) '(nil))
         ((or (null pattern) (null input)) nil)
         (t (let ((current-pattern (first pattern))
-              (current-input (first input))
-              (result (pat-match (rest pattern) (rest input))))
-          (cond ((not result) nil)
-                ((variable-p current-pattern)
-                 (append (list (list 'variable current-pattern current-input))
-                         result))
-                ((and (atom current-pattern) (atom current-input) (eql current-pattern current-input))
-                 (append '(()) result))
-                (t f))))))
+                 (current-input (first input))
+                 (result (pat-match (rest pattern) (rest input))))
+             (cond ((not result) nil)
+                   ((variable-p current-pattern)
+                    (let ((var (list (list 'variable current-pattern current-input))))
+                      (if (null (first result))
+                          var
+                          (append var result))))
+                   ((and (atom current-pattern) (atom current-input) (eql current-pattern current-input))
+                    (if (null (first result))
+                        '(matched)
+                        result))
+                   (t f))))))
 
+;; match with ?x
+(print (pat-match '(I need f ?X ?X) '(I need f t f)))
 
-(print (pat-match '(I need f ?X) '(I need f t)))
+;; match without ?x
+(print (pat-match '(I need f) '(I need f)))
+(print (pat-match '(I need v f) '(I need v f)))
 
+;; non match
 (print (pat-match '(I need f) '(I need f t)))
-                 
-                 
+
