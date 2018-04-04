@@ -19,4 +19,6 @@
   
   (print (pat-match '((?* ?p) need (?* ?x)) '(Mr Hulot and I need a vacation)))
   
-  (print (pat-match '((?* ?x) is a (?* ?y)) '(what he is is a fool))))
+  (print (pat-match '((?* ?x) is a (?* ?y)) '(what he is is a fool)))
+  
+  (print (pat-match '((?* ?x) a b (?* ?x)) '(1 2 a b a b 1 2 a b))))

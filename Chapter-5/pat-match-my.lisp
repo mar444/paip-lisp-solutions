@@ -38,10 +38,11 @@
     (if (null pat) (match-variable var input bindings)
         (let ((pos (position (first pat) input :start start :test #'equal)))
           (if (null pos) fail
-              (let ((result-2 (pat-match pat (subseq input pos) bindings)))
+              (let ((result-2 (pat-match pat (subseq input pos)
+                                         (match-variable var (subseq input 0 pos) bindings))))
                 (if (eq result-2 fail)
                     (match-segment pattern input bindings (+ pos 1))
-                    (match-variable var (subseq input 0 pos) result-2))))))))
+                    result-2)))))))
 
 
 (defun get-binding (var bindings)
@@ -59,7 +60,4 @@
 (defun starts-with (list x)
   (and (consp list) (eql (first list) x)))
 
-
-
-; (run-tests #'pat-match)
-
+(run-tests #'pat-match)
