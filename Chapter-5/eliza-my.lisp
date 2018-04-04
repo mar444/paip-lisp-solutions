@@ -63,17 +63,17 @@
 (defun rule-pattern (rule) (first rule))
 (defun rule-responses (rule) (rest rule))
 
-(defun eliza ()
+(defun robot (rules)
   (loop
-    (print 'eliza>)
-    (write (flatten (use-eliza-rules (read))) :pretty t)))
+    (print 'robot>)
+    (write (flatten (use-rules (read) rules)) :pretty t)))
 
 
-(defun use-eliza-rules (input)
+(defun use-rules (input rules)
   (some #'(lambda (rule) 
            (let ((result (pat-match (rule-pattern rule) input)))
              (if result
                  (sublis result (random-elt (rule-responses rule))))))
-         *eliza-rules*))
+         rules))
 
 ;(run-tests #'pat-match)
