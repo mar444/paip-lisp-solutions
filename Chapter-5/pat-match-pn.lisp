@@ -180,6 +180,3 @@
           (if (not (eq result fail))
               (funcall action result (funcall rule-then rule)))))
     rules))
-
-
-(print (pat-match '((?* ?P) need (?* ?X)) '(I really need A R)))

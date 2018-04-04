@@ -1,8 +1,6 @@
-; (load "auxfns.lisp")
+(load "auxfns.lisp")
 (load "tests.lisp")
-
-(defconstant fail nil)
-(defconstant no-bindings '((t . t)))
+(load "rules.lisp")
 
 
 (defun variable-p (x)
@@ -16,9 +14,9 @@
   (cond ((eq bindings fail) fail)
         ((variable-p pattern)
          (match-variable pattern input bindings))
+        ((eql pattern input) bindings)
         ((segment-p pattern)
          (match-segment pattern input bindings))
-        ((eql pattern input) bindings)
         ((and (consp pattern) (consp input))
          (pat-match (rest pattern) (rest input)
                     (pat-match (first pattern) (first input) bindings)))
@@ -57,7 +55,25 @@
             nil
             bindings)))
 
-(defun starts-with (list x)
-  (and (consp list) (eql (first list) x)))
+(defun starts-with (list x) (and (consp list) (eql (first list) x)))
 
-(run-tests #'pat-match)
+(defun random-elt (seq) (elt seq (random (length seq))))
+
+
+(defun rule-pattern (rule) (first rule))
+(defun rule-responses (rule) (rest rule))
+
+(defun eliza ()
+  (loop
+    (print 'eliza>)
+    (write (flatten (use-eliza-rules (read))) :pretty t)))
+
+
+(defun use-eliza-rules (input)
+  (some #'(lambda (rule) 
+           (let ((result (pat-match (rule-pattern rule) input)))
+             (if result
+                 (sublis result (random-elt (rule-responses rule))))))
+         *eliza-rules*))
+
+;(run-tests #'pat-match)
