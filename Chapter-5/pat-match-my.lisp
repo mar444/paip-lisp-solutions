@@ -10,13 +10,15 @@
 
 (defun segment-p (x)
   (and (consp x)
-       (starts-with x '?*)))
+       (starts-with (car x) '?*)))
 
 (defun pat-match (pattern input &optional (bindings no-bindings))
   (cond ((eq bindings fail) fail)
         ((variable-p pattern)
          (match-variable pattern input bindings))
-        ((and (atom pattern) (atom input) (eql pattern input)) bindings)
+        ((segment-p pattern)
+         (match-segment pattern input bindings))
+        ((eql pattern input) bindings)
         ((and (consp pattern) (consp input))
          (pat-match (rest pattern) (rest input)
                     (pat-match (first pattern) (first input) bindings)))
@@ -30,16 +32,16 @@
           (t fail))))
 
 
-(defun match-segment (pattern input result &optional (start 0))
+(defun match-segment (pattern input bindings &optional (start 0))
   (let* ((var (second (first pattern)))
-         (target (first (rest pattern)))
-         (pos (find target input :start start :test #'equal)))
-    (if (null pos)
-        nil
-        (let ((result-2 (pat-match (rest pattern) (subseq input pos))))
-          (if (null result-2)
-              (match-segment pattern input result (+ pos 1))
-              (append (list (cons var (subseq input 0 pos))) result-2))))))
+         (pat (rest pattern)))
+    (if (null pat) (match-variable var input bindings)
+        (let ((pos (position (first pat) input :start start :test #'equal)))
+          (if (null pos) fail
+              (let ((result-2 (pat-match pat (subseq input pos) bindings)))
+                (if (eq result-2 fail)
+                    (match-segment pattern input bindings (+ pos 1))
+                    (match-variable var (subseq input 0 pos) result-2))))))))
 
 
 (defun get-binding (var bindings)
@@ -54,10 +56,10 @@
             nil
             bindings)))
 
+(defun starts-with (list x)
+  (and (consp list) (eql (first list) x)))
 
-; (print (pat-match '((?* ?P) need (?* ?X)) '(I really need A F)))
 
-; (print (pat-match '((?* ?P) need (?* ?X)) '(I really need A F)))
 
-(run-tests #'pat-match)
+; (run-tests #'pat-match)
 

@@ -15,4 +15,8 @@
   
   
   (print (sublis (pat-match '(I need f ?X ?Y) '(I need f t f))
-                 '(what would it mean to you if you got a ?X ?Y))))
+                 '(what would it mean to you if you got a ?X ?Y)))
+  
+  (print (pat-match '((?* ?p) need (?* ?x)) '(Mr Hulot and I need a vacation)))
+  
+  (print (pat-match '((?* ?x) is a (?* ?y)) '(what he is is a fool))))
