@@ -100,12 +100,13 @@
 (defun use-rules (input rules)
   (some #'(lambda (rule) 
            (let ((result (pat-match (rule-pattern rule) input)))
-             (cond ((not (eq result FAIL))
+             (if (not (eq result FAIL))
                     (progn
                       (extend-topics result)
-                      (sublis result (random-elt (rule-responses rule)))))
-                   )))
-        rules))
+                      (sublis result (random-elt (rule-responses rule))))
+                    `(Tell me more about ,(random-elt *topics*))
+                    ))))
+        rules)
 
 (defun eliza() 
   (robot *eliza-rules*))

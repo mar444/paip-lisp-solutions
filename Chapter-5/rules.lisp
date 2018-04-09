@@ -118,6 +118,4 @@
     (You do not seem quite certain))
    (((?* ?x) are (?* ?y))
     (Did you think they might not be ?y)
-    (Possibly they are ?y))
-   (((?* ?x))               
-    (No match))))
+    (Possibly they are ?y))))
