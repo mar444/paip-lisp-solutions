@@ -2,6 +2,9 @@
 (load "tests.lisp")
 (load "rules.lisp")
 
+(defvar *topics* nil)
+
+(defvar *equals* '(((everybody) everyone)))
 
 (defun variable-p (x)
   (and (symbolp x) (equal (char (symbol-name x) 0) #\?)))
@@ -66,7 +69,8 @@
 (defun robot (rules)
   (loop
     (print 'robot>)
-    (let ((response (flatten (use-rules (read-line-no-punct) rules))))
+    (let* ((input (normalize (read-line-no-punct)))
+           (response (flatten (use-rules input rules))))
       (print-with-spaces response)
       (if (equal response '(good bye))
           (RETURN)))))
@@ -82,15 +86,31 @@
                  ")")))
 
 
+(defun extend-topics (topic)
+  (union *topics* (topic-content topic)))
+
+(defun topic-content (topic)
+  (binding-val topic))
+
+(defun normalize (input)
+  (dolist (cur *equals*)
+    (setf input (substitute-if (second cur) #'(lambda (item) (member item (car cur))) input)))
+  input)
+
 (defun use-rules (input rules)
   (some #'(lambda (rule) 
            (let ((result (pat-match (rule-pattern rule) input)))
-             (if result
-                 (sublis result (random-elt (rule-responses rule))))))
+             (cond ((not (eq result FAIL))
+                    (progn
+                      (extend-topics result)
+                      (sublis result (random-elt (rule-responses rule)))))
+                   )))
         rules))
 
 (defun eliza() 
   (robot *eliza-rules*))
+
+(print (use-rules '(literr) *eliza-rules*))
 
 
 ;(run-tests #'pat-match)
