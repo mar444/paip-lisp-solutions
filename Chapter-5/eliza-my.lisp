@@ -67,7 +67,9 @@
   (loop
     (print 'robot>)
     (let ((response (flatten (use-rules (read-line-no-punct) rules))))
-      (print-with-spaces response))))
+      (print-with-spaces response)
+      (if (equal response '(good bye))
+          (RETURN)))))
 
 (defun print-with-spaces (list)
   (format t "~{~a ~}" list))
