@@ -23,8 +23,9 @@
   (compiler-options :warnings nil)
    
   #+sbcl
-  (dolist (pkg '(common-lisp common-lisp-user))
-    (sb-ext:unlock-package pkg))
+  (progn
+    (sb-ext:unlock-package '#:common-lisp)
+    (sb-ext:unlock-package '#:common-lisp-user))
   )
 
 ;;;; REQUIRES

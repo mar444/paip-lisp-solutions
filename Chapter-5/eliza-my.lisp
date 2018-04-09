@@ -66,7 +66,15 @@
 (defun robot (rules)
   (loop
     (print 'robot>)
-    (write (flatten (use-rules (read) rules)) :pretty t)))
+    (let ((response (flatten (use-rules (read-line-no-punct) rules))))
+      (write response :pretty t))))
+
+(defun read-line-no-punct ()
+  (read-from-string 
+    (concatenate 'string "("
+      (substitute-if #\space #'(lambda (char) 
+                                (find char ".,;:`!?#-()\\\"")) (read-line))
+      ")")))
 
 
 (defun use-rules (input rules)
@@ -75,5 +83,9 @@
              (if result
                  (sublis result (random-elt (rule-responses rule))))))
          rules))
+
+(defun eliza() 
+  (robot *eliza-rules*))
+
 
 ;(run-tests #'pat-match)
