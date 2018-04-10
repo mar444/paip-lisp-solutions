@@ -2,7 +2,7 @@
 (load "tests.lisp")
 (load "rules.lisp")
 
-(defvar *topics* nil)
+(defvar *topics* '(you))
 
 (defvar *equals* '(((everybody) everyone)))
 
@@ -70,10 +70,13 @@
   (loop
     (print 'robot>)
     (let* ((input (normalize (read-line-no-punct)))
-           (response (flatten (use-rules input rules))))
+           (result (flatten (use-rules input rules)))
+           (response (if (null result)
+                         `(Tell me more about ,(random-elt *topics*))
+                         result)))
       (print-with-spaces response)
-      (if (equal response '(good bye))
-          (RETURN)))))
+      (if (equal response '(good bye)) (RETURN)))))
+
 
 (defun print-with-spaces (list)
   (format t "~{~a ~}" list))
@@ -87,10 +90,12 @@
 
 
 (defun extend-topics (topic)
-  (union *topics* (topic-content topic)))
+  (let ((content (topic-content topic)))
+    (if (and (not (listp content)) (not (null content)))
+        (setf *topics* (union *topics* (list content))))))
 
 (defun topic-content (topic)
-  (binding-val topic))
+  (second topic))
 
 (defun normalize (input)
   (dolist (cur *equals*)
@@ -101,17 +106,17 @@
   (some #'(lambda (rule) 
            (let ((result (pat-match (rule-pattern rule) input)))
              (if (not (eq result FAIL))
-                    (progn
-                      (extend-topics result)
-                      (sublis result (random-elt (rule-responses rule))))
-                    `(Tell me more about ,(random-elt *topics*))
-                    ))))
-        rules)
+                 (progn
+                   (dolist (topic result)
+                     (extend-topics topic))
+                   (sublis result (random-elt (rule-responses rule)))))))
+        rules))
 
 (defun eliza() 
   (robot *eliza-rules*))
 
-(print (use-rules '(literr) *eliza-rules*))
+(use-rules '(sorry tom) *eliza-rules*)
+(use-rules '(ite) *eliza-rules*)
 
 
 ;(run-tests #'pat-match)
